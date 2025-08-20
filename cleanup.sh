@@ -56,5 +56,5 @@ echo -e "${GREEN}🎉 Cleanup completed!${NC}"
 # Optional: Clean up registry
 echo ""
 echo -e "${YELLOW}💡 Optional: To also remove the local registry, run on master node:${NC}"
-echo -e "   nerdctl stop local-registry"
-echo -e "   nerdctl rm local-registry"
+echo -e "   docker stop local-registry"
+echo -e "   docker rm local-registry"

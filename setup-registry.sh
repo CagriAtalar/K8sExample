@@ -20,24 +20,24 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}📁 Current directory: $(pwd)${NC}"
 
-# Check if nerdctl is available
-if ! command -v nerdctl &> /dev/null; then
-    echo -e "${RED}❌ nerdctl is not available!${NC}"
-    echo -e "${YELLOW}   Please install nerdctl first.${NC}"
+# Check if docker is available
+if ! command -v docker &> /dev/null; then
+    echo -e "${RED}❌ docker is not available!${NC}"
+    echo -e "${YELLOW}   Please install docker first.${NC}"
     exit 1
 fi
 
 # Stop and remove existing registry if it exists
 echo -e "${YELLOW}🔍 Checking for existing registry...${NC}"
-if nerdctl ps -a | grep -q $REGISTRY_NAME; then
+if docker ps -a | grep -q $REGISTRY_NAME; then
     echo -e "${YELLOW}🛑 Stopping existing registry...${NC}"
-    nerdctl stop $REGISTRY_NAME || true
-    nerdctl rm $REGISTRY_NAME || true
+    docker stop $REGISTRY_NAME || true
+    docker rm $REGISTRY_NAME || true
 fi
 
 # Run the registry container
 echo -e "${YELLOW}🔨 Starting local registry on port $REGISTRY_PORT...${NC}"
-nerdctl run -d \
+docker run -d \
     -p $REGISTRY_PORT:5000 \
     --name $REGISTRY_NAME \
     --restart unless-stopped \
@@ -52,7 +52,7 @@ if curl -f http://localhost:$REGISTRY_PORT/v2/ &> /dev/null; then
     echo -e "${GREEN}✅ Registry is running successfully!${NC}"
 else
     echo -e "${RED}❌ Registry failed to start properly!${NC}"
-    nerdctl logs $REGISTRY_NAME
+    docker logs $REGISTRY_NAME
     exit 1
 fi
 
@@ -60,7 +60,7 @@ fi
 echo -e "${BLUE}📋 Registry Information:${NC}"
 echo -e "   Name: $REGISTRY_NAME"
 echo -e "   URL: http://$MASTER_IP:$REGISTRY_PORT"
-echo -e "   Status: $(nerdctl ps --filter name=$REGISTRY_NAME --format "table {{.Status}}" | tail -n 1)"
+echo -e "   Status: $(docker ps --filter name=$REGISTRY_NAME --format "table {{.Status}}" | tail -n 1)"
 
 echo -e "${GREEN}🎉 Local registry setup completed!${NC}"
 echo -e "${BLUE}📝 Next steps:${NC}"

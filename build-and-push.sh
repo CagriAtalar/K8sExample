@@ -24,10 +24,10 @@ cd "$SCRIPT_DIR"
 
 echo -e "${BLUE}📁 Current directory: $(pwd)${NC}"
 
-# Check if nerdctl is available
-if ! command -v nerdctl &> /dev/null; then
-    echo -e "${RED}❌ nerdctl is not available!${NC}"
-    echo -e "${YELLOW}   Please install nerdctl first.${NC}"
+# Check if docker is available
+if ! command -v docker &> /dev/null; then
+    echo -e "${RED}❌ docker is not available!${NC}"
+    echo -e "${YELLOW}   Please install docker first.${NC}"
     exit 1
 fi
 
@@ -50,7 +50,7 @@ build_and_push() {
     cd "$service"
     
     # Build the image
-    nerdctl build -t "$image_name" .
+    docker build -t "$image_name" .
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ $service build failed!${NC}"
         exit 1
@@ -58,7 +58,7 @@ build_and_push() {
     
     # Push to registry
     echo -e "${YELLOW}📤 Pushing $service image to registry...${NC}"
-    nerdctl push "$image_name"
+    docker push "$image_name"
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ $service push failed!${NC}"
         exit 1

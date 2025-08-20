@@ -9,4 +9,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: standard
+  storageClassName: manual
+  selector:
+    matchLabels:
+      app: postgres

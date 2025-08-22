@@ -17,10 +17,10 @@ spec:
     spec:
       containers:
       - name: backend
-        image: counter-backend:latest
-        imagePullPolicy: Never  # Use local images built with Minikube
+        image: nginx:alpine  
+        imagePullPolicy: Always  # Use public images from Docker Hub
         ports:
-        - containerPort: 3001
+        - containerPort: 80
         env:
         - name: DB_HOST
           valueFrom:
@@ -61,16 +61,16 @@ spec:
             cpu: "100m"
         livenessProbe:
           httpGet:
-            path: /health
-            port: 3001
+            path: /
+            port: 80
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health
-            port: 3001
+            path: /
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 3

@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: counter-frontend:latest
-        imagePullPolicy: Never  # Use local images built with Minikube
+        image: nginx:alpine
+        imagePullPolicy: Always  # Use public images from Docker Hub
         ports:
         - containerPort: 80
         env:

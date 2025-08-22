@@ -4,5 +4,6 @@ metadata:
   name: frontend-config
   namespace: default
 data:
-  # Backend API URL - this will be accessible from the browser
-  REACT_APP_API_URL: "http://192.168.0.233:30001"
+  # Backend API URL - this will be accessible from the browser via Minikube
+  # This will be updated by the deployment script with actual Minikube IP
+  REACT_APP_API_URL: "http://172.27.108.39:8001/api/v1/namespaces/default/services/backend-nodeport-service:3001/proxy"

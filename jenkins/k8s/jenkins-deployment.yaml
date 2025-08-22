@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccount: jenkins
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      initContainers:
+      - name: volume-permissions
+        image: busybox
+        command: ['sh', '-c', 'chown -R 1000:1000 /var/jenkins_home']
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+        securityContext:
+          runAsUser: 0
+      - name: install-tools
+        image: alpine:latest
+        command: 
+        - sh
+        - -c
+        - |
+          apk add --no-cache curl
+          # Install kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /tools/kubectl
+          # Install docker client
+          curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-20.10.24.tgz | tar -xz
+          mv docker/docker /tools/docker
+        volumeMounts:
+        - name: tools
+          mountPath: /tools
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts-jdk11
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - name: http-port
+          containerPort: 8080
+        - name: jnlp-port
+          containerPort: 50000
+        livenessProbe:
+          httpGet:
+            path: "/login"
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: "/login"
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: kubectl-config
+          mountPath: /root/.kube
+        - name: tools
+          mountPath: /usr/local/bin
+          subPath: .
+        env:
+        - name: JENKINS_OPTS
+          value: "--httpPort=8080"
+        - name: JAVA_OPTS
+          value: "-Xmx512m -Djava.awt.headless=true"
+        - name: DOCKER_HOST
+          value: "unix:///var/run/docker.sock"
+      volumes:
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-pvc
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: kubectl-config
+        hostPath:
+          path: /root/.kube
+          type: DirectoryOrCreate
+      - name: tools
+        emptyDir: {}

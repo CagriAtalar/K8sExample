@@ -54,6 +54,12 @@ app.get('/health', (req, res) => {
     });
 });
 
+app.post("/api/increment/:count", async (req, res) => {
+    const { count } = req.params;
+    await pool.query(`UPDATE counter SET count = count + ${count} WHERE id = 1`);
+    res.json({ message: `Count incremented by ${count}` });
+});
+
 // Get current count
 app.get('/api/count', async (req, res) => {
     try {

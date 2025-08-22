@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: nginx:alpine
-        imagePullPolicy: Always  # Use public images from Docker Hub
+        image: dockersamples/static-site:latest
+        imagePullPolicy: Always  # Use demo static site
         ports:
         - containerPort: 80
         env:

@@ -17,10 +17,11 @@ spec:
     spec:
       containers:
       - name: backend
-        image: nginx:alpine  
-        imagePullPolicy: Always  # Use public images from Docker Hub
+        image: node:16-alpine
+        imagePullPolicy: Always  # Use Node.js base image
+        command: ["sh", "-c", "echo 'const express = require(\"express\"); const app = express(); app.get(\"/\", (req,res) => res.json({message: \"Backend API Working!\", status: \"OK\"})); app.get(\"/health\", (req,res) => res.json({status: \"healthy\"})); app.listen(3000, () => console.log(\"Server running on port 3000\"));' > server.js && npm init -y && npm install express && node server.js"]
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         env:
         - name: DB_HOST
           valueFrom:
@@ -61,17 +62,17 @@ spec:
             cpu: "100m"
         livenessProbe:
           httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 30
+            path: /health
+            port: 3000
+          initialDelaySeconds: 60
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3

@@ -183,9 +183,12 @@ pipeline {
                 script {
                     sh '''
                         echo "Checking Kubernetes YAML files..."
+                        echo "DEBUG: Current PATH = $PATH"
                         
                         # Validate backend deployment
                         export PATH="/tmp:/usr/local/bin:$PATH"
+                        echo "DEBUG: Updated PATH = $PATH"
+                        echo "DEBUG: kubectl location = $(which kubectl 2>/dev/null || echo 'not found')"
                         kubectl apply --dry-run=client -f k8s/backend/ || echo "Backend config needs review"
                         
                         # Validate frontend deployment  

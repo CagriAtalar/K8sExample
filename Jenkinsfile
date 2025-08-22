@@ -152,11 +152,10 @@ pipeline {
                 echo '🔨 Preparing backend deployment...'
                 script {
                     sh '''
-                        echo "Using pre-built image for backend: node:16-alpine"
+                        echo "Using pre-built image for backend: nginx:alpine"
                         echo "Backend will be deployed with tag: ${IMAGE_TAG}"
                         
-                        # Update backend deployment with new image tag
-                        sed -i "s|image:.*|image: node:16-alpine|g" k8s/backend/backend-deployment.yaml || true
+                        # Backend deployment YAML already contains correct image
                     '''
                 }
             }
@@ -170,8 +169,7 @@ pipeline {
                         echo "Using pre-built image for frontend: nginx:alpine"
                         echo "Frontend will be deployed with tag: ${IMAGE_TAG}"
                         
-                        # Update frontend deployment with new image tag
-                        sed -i "s|image:.*|image: nginx:alpine|g" k8s/frontend/frontend-deployment.yaml || true
+                        # Frontend deployment YAML already contains correct image
                     '''
                 }
             }
@@ -230,8 +228,7 @@ pipeline {
                 script {
                     sh '''
                         export PATH="/tmp:/usr/local/bin:$PATH"
-                        # Update backend deployment with new image tag
-                        kubectl set image deployment/backend-deployment backend=${BACKEND_IMAGE}:${IMAGE_TAG} -n ${K8S_NAMESPACE} || \
+                        # Deploy backend using YAML files
                         kubectl apply -f k8s/backend/
                         
                         # Wait for backend to be ready
@@ -257,8 +254,7 @@ pipeline {
                         # Apply frontend configmap
                         kubectl apply -f k8s/frontend/frontend-configmap.yaml
                         
-                        # Update frontend deployment with new image tag
-                        kubectl set image deployment/frontend-deployment frontend=${FRONTEND_IMAGE}:${IMAGE_TAG} -n ${K8S_NAMESPACE} || \
+                        # Deploy frontend using YAML files
                         kubectl apply -f k8s/frontend/
                         
                         # Wait for frontend to be ready
